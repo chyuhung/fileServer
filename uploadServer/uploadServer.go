@@ -1,10 +1,10 @@
 package main
 
 import (
-	"./controler"
+	"uploadServer/controler"
+
 	"github.com/gin-gonic/gin"
 )
-
 
 func main() {
 	e := gin.Default()
@@ -13,5 +13,5 @@ func main() {
 	e.GET("/fileServer/getProgress", controler.GetProgress)
 	e.POST("/fileServer/uploadDelete", controler.UploadDelete)
 	e.GET("/fileServer/download/:fileName", controler.GetFile)
-	e.Run(":8848")
+	e.Run(":27149")
 }
