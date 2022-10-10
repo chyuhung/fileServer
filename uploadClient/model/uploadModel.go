@@ -15,8 +15,6 @@ import (
 	"strconv"
 )
 
-const TargetUrl = "http://127.0.0.1:27149/fileServer"
-
 type UploadModel struct {
 	userId      string //用户id  "780002"
 	filePath    string //文件路径，包含文件名
@@ -28,6 +26,7 @@ type UploadModel struct {
 	fileHash    string //文件哈希，由上传路径 + 上传文件名 + 大小  计算得到
 	progress    int64  //进度，已经传了多少
 	isReady     bool   //如果续传 是否准备好
+	targetUrl   string // Server url
 }
 
 func (self *UploadModel) Init(userId, filePath, uploadPath string) error {
@@ -51,9 +50,12 @@ func (self *UploadModel) Init(userId, filePath, uploadPath string) error {
 	self.fileHash = base32.StdEncoding.EncodeToString(result) //上传路径 + 上传文件名 + 大小 计算hash 再使用base32编码转字符串
 	return nil
 }
+func (self *UploadModel) SetUrl(url string) {
+	self.targetUrl = url
+}
 
 func (self *UploadModel) GetProgressFromServer() (info *progressData, err error) {
-	u, _ := url.Parse(TargetUrl + "/getProgress")
+	u, _ := url.Parse(self.targetUrl + "/getProgress")
 	q := u.Query()
 	q.Set("user_id", self.userId)
 	q.Set("file_name", self.uploadName)
@@ -95,7 +97,7 @@ func (self *UploadModel) UploadStart() error {
 		return err
 	}
 	writer := Writer{fh, self.progress}
-	u, _ := url.Parse(TargetUrl + "/uploadAppend")
+	u, _ := url.Parse(self.targetUrl + "/uploadAppend")
 	q := u.Query()
 	q.Set("user_id", self.userId)
 	q.Set("file_name", self.uploadName)
@@ -137,7 +139,7 @@ func (self *UploadModel) UploadStart() error {
 }
 
 func (self *UploadModel) UploadDelete() error {
-	resp, err := http.PostForm(TargetUrl+"/uploadDelete", url.Values{"user_id": {self.userId}, "task_hash": {self.fileHash}})
+	resp, err := http.PostForm(self.targetUrl+"/uploadDelete", url.Values{"user_id": {self.userId}, "task_hash": {self.fileHash}})
 
 	defer resp.Body.Close()
 	if err != nil {

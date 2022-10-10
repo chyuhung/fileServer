@@ -1,20 +1,33 @@
 package main
 
 import (
+	"flag"
 	"fmt"
 	"uploadClient/model"
 )
 
 func main() {
-	user := "chengyh"
-	filePath := "/root/go/src/fileServer/uploadClient/files/123.txt"
-	uploadPath := "myfile"
+	var (
+		user       string // upload user
+		filePath   string // "/root/go/src/fileServer/uploadClient/files/123.txt"
+		uploadPath string // "myfile"
+		targetUrl  string // "http://127.0.0.1:27149/fileServer" "http://10.191.22.9:8001/27149"
+	)
+	//命令行参数
+	flag.StringVar(&user, "u", "default", "upload user.")
+	flag.StringVar(&filePath, "f", "", "file path.")
+	flag.StringVar(&uploadPath, "d", "", "remote dir path.")
+	flag.StringVar(&targetUrl, "l", "http://127.0.0.1:27149/fileServer", "server url.")
+	flag.Parse()
+
 	uploadModel := model.UploadModel{}
 	err := uploadModel.Init(user, filePath, uploadPath)
 	if err != nil {
 		fmt.Println(err)
 		return
 	}
+	// set url
+	uploadModel.SetUrl(targetUrl)
 	uploadModel.IsCover = false //是否覆盖上传
 	//fileHash := arsHash.FileHash(filePath)
 	//fmt.Println(fileHash)
