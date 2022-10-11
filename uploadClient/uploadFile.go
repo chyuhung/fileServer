@@ -19,7 +19,7 @@ func main() {
 	//命令行参数
 	flag.StringVar(&user, "u", "public", "upload user.")
 	flag.StringVar(&filePath, "f", "", "local file path.")
-	flag.StringVar(&uploadPath, "r", "/*home*", "remote dir path. option: /*home*, /*public*.\neg: -r /*home*/newdir\n")
+	flag.StringVar(&uploadPath, "r", "/*home*", "remote dir path. option: /*home*, /*public*.\ne.g. -r /*home*/newdir")
 	flag.StringVar(&targetUrl, "l", "http://127.0.0.1:27149/fileServer", "server url.")
 	flag.StringVar(&fileName, "n", "", "download filename.")
 	flag.BoolVar(&isCover, "o", false, "overwrite.")
@@ -34,15 +34,13 @@ func main() {
 			if err != nil {
 				fmt.Println("dowload failed")
 				fmt.Println(err.Error())
-				return
 			}
-			return
 		} else {
 			fmt.Println("-d must with -u -n -r, without -o -f.")
-			return
 		}
+		return
 	}
-
+	// upload file
 	uploadModel := model.UploadModel{}
 	err := uploadModel.Init(user, filePath, uploadPath)
 	if err != nil {

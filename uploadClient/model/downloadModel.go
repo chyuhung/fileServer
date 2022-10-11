@@ -31,12 +31,15 @@ func (self *DownloadModel) Download() error {
 	q.Set("target_path", self.uploadPath)
 	u.RawQuery = q.Encode()
 	res, err := http.Get(u.String())
-	if err != nil {
+	if res.StatusCode != 200 || err != nil {
+		if res.StatusCode == 404 {
+			fmt.Println("error code 404")
+		}
 		fmt.Println("Download request error")
 		return err
 	}
 	defer res.Body.Close()
-	// 保存的文件
+	// 保存文件
 	dir, _ := os.Getwd()
 	fileDir := filepath.Join(dir, "download")
 	os.MkdirAll(fileDir, 0755)
@@ -52,6 +55,5 @@ func (self *DownloadModel) Download() error {
 		fmt.Println("Download read body error")
 		return err
 	}
-
 	return nil
 }

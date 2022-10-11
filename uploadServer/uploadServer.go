@@ -2,11 +2,14 @@ package main
 
 import (
 	"uploadServer/controler"
+	"uploadServer/global"
 
 	"github.com/gin-gonic/gin"
 )
 
 func main() {
+	// init path
+	global.GetPath()
 	e := gin.Default()
 	e.POST("/fileServer/uploadAppend", controler.AppendHandle)
 	e.POST("/fileServer/uploadNewFile", controler.UploadNewFile)

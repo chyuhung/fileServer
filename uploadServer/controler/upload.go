@@ -10,14 +10,17 @@ import (
 	"strings"
 
 	"uploadServer/arsHash"
+	"uploadServer/global"
 
 	"github.com/gin-gonic/gin"
 )
 
-// const UserDataPath = "/data/cloud/data/data/"
-// const TempDataPath = "/data/cloud/data/data/temp/"
-const UserDataPath = "/root/go/src/fileServer/uploadServer/"
-const TempDataPath = "/root/go/src/fileServer/uploadServer/temp/"
+var (
+	myPath = global.GetPath()
+)
+
+//const myPath.UserDataPath = "/root/go/src/fileServer/uploadServer/"
+//const myPath.TempDataPath = "/root/go/src/fileServer/uploadServer/"
 
 type fileInfo struct {
 	FileName string `json:"fileName"`
@@ -58,17 +61,17 @@ func createFilePath(path string) error {
 func uploadPathToLocalPath(user, uploadPath string) string {
 	if len(uploadPath) >= 9 { //   "/*public*"的长度是9
 		if strings.Compare(uploadPath[0:9], "/*public*") == 0 {
-			return fmt.Sprintf("%scommon%s/", UserDataPath, uploadPath[9:]) //realPath为空时 //  双斜杠等效于 /
+			return fmt.Sprintf("%scommon%s/", myPath.UserDataPath, uploadPath[9:]) //realPath为空时 //  双斜杠等效于 /
 		}
 
 	}
 	if len(uploadPath) >= 7 { //   "/*home*"的长度是7
 		if strings.Compare(uploadPath[0:7], "/*home*") == 0 {
-			return fmt.Sprintf("%sUser/%s/home%s/", UserDataPath, user, uploadPath[7:]) //realPath为空时 //  双斜杠等效于 /
+			return fmt.Sprintf("%sUser/%s/home%s/", myPath.UserDataPath, user, uploadPath[7:]) //realPath为空时 //  双斜杠等效于 /
 		}
 
 	}
-	return fmt.Sprintf("%sUser/%s/home/", UserDataPath, user)
+	return fmt.Sprintf("%sUser/%s/home/", myPath.UserDataPath, user)
 }
 
 // 名称重复时，获取最新的名称
@@ -121,7 +124,7 @@ func GetProgress(c *gin.Context) {
 	fileName := c.Query("file_name")
 	filePath := c.Query("target_path")
 	fileHash := c.Query("task_hash") //可以用uuid
-	fileTmp := TempDataPath + user + "/" + fileHash
+	fileTmp := myPath.TempDataPath + user + "/" + fileHash
 	if fileHash == "" {
 		c.JSON(http.StatusOK, gin.H{"code": -1, "description": "file_hash is null"})
 		return
@@ -158,7 +161,7 @@ func GetFile(c *gin.Context) {
 func UploadDelete(c *gin.Context) {
 	user := c.PostForm("user_id")
 	fileHash := c.PostForm("task_hash") //可以用uuid
-	fileTmp := TempDataPath + user + "/" + fileHash
+	fileTmp := myPath.TempDataPath + user + "/" + fileHash
 	if fileHash == "" {
 		c.JSON(http.StatusOK, gin.H{"code": -1, "description": "file_hash is null"})
 		return
@@ -189,8 +192,8 @@ func AppendHandle(c *gin.Context) {
 		c.JSON(http.StatusOK, gin.H{"code": -1, "description": "file_hash is null"})
 		return
 	}
-	fileTempPath := TempDataPath + user + "/" + fileHash
-	err = createFilePath(TempDataPath + user)
+	fileTempPath := myPath.TempDataPath + user + "/" + fileHash
+	err = createFilePath(myPath.TempDataPath + user)
 	if err != nil {
 		fmt.Println(err)
 		c.JSON(http.StatusOK, gin.H{"code": -1, "description": "creat tmp folder failed"})
@@ -268,8 +271,8 @@ func UploadNewFile(c *gin.Context) {
 		c.JSON(http.StatusOK, gin.H{"code": -1, "description": "file_hash is null"})
 		return
 	}
-	fileTempPath := TempDataPath + user + "/" + fileHash
-	err = createFilePath(TempDataPath + user)
+	fileTempPath := myPath.TempDataPath + user + "/" + fileHash
+	err = createFilePath(myPath.TempDataPath + user)
 	if err != nil {
 		fmt.Println(err)
 		c.JSON(http.StatusOK, gin.H{"code": -1, "description": "creat tmp folder failed"})
@@ -331,10 +334,10 @@ func UploadNewFile(c *gin.Context) {
 }
 
 func init() {
-	exist := pathExists(TempDataPath)
+	exist := pathExists(myPath.TempDataPath)
 	if !exist {
 		// 创建文件夹
-		err := os.Mkdir(TempDataPath, os.ModePerm)
+		err := os.Mkdir(myPath.TempDataPath, os.ModePerm)
 		if err != nil {
 			fmt.Printf("mkdir failed![%v]\n", err)
 			os.Exit(2)
