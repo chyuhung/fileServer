@@ -54,6 +54,10 @@ func (self *UploadModel) SetUrl(url string) {
 	self.targetUrl = url
 }
 
+func (self *UploadModel) FileName() string {
+	return self.uploadName
+}
+
 func (self *UploadModel) GetProgressFromServer() (info *progressData, err error) {
 	u, _ := url.Parse(self.targetUrl + "/getProgress")
 	q := u.Query()
@@ -140,7 +144,6 @@ func (self *UploadModel) UploadStart() error {
 
 func (self *UploadModel) UploadDelete() error {
 	resp, err := http.PostForm(self.targetUrl+"/uploadDelete", url.Values{"user_id": {self.userId}, "task_hash": {self.fileHash}})
-
 	defer resp.Body.Close()
 	if err != nil {
 		fmt.Println("UploadDelete request error")

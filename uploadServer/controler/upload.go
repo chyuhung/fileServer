@@ -145,9 +145,12 @@ func GetProgress(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{"code": 0, "description": "", "data": gin.H{"progress": progress}})
 }
 func GetFile(c *gin.Context) {
-	fileName := c.Param("fileName")
+	fileName := c.Query("file_name")
 	user := c.Query("user_id")
 	filePath := c.Query("target_path")
+	c.Header("Content-Type", "application/octet-stream")
+	c.Header("Content-Disposition", "attachment; filename="+fileName)
+	c.Header("Content-Transfer-Encoding", "binary")
 
 	localPath := uploadPathToLocalPath(user, filePath)
 	c.File(localPath + fileName)
