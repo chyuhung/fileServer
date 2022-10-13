@@ -4,20 +4,22 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
+	"runtime"
 	"sync"
 )
 
 var (
-	myPath    *Path
+	myPath    *path
 	pathMutex sync.Mutex
 )
 
-type Path struct {
+type path struct {
 	UserDataPath string
 	TempDataPath string
+	delimiter    string
 }
 
-func GetPath() *Path {
+func InitPath() *path {
 	if myPath != nil {
 		return myPath
 	}
@@ -27,14 +29,23 @@ func GetPath() *Path {
 	if myPath != nil {
 		return myPath
 	}
-	myPath = &Path{}
+	myPath = &path{}
 	dirPath, err := os.Getwd()
 	if err != nil {
 		fmt.Println(err.Error())
 		os.Exit(1)
 	}
-	myPath.UserDataPath = dirPath
-	myPath.TempDataPath = filepath.Join(myPath.UserDataPath, "temp")
+	switch runtime.GOOS {
+	case "linux":
+		myPath.delimiter = "/"
+	case "windows":
+		myPath.delimiter = "\\"
+	default:
+		fmt.Println("runtime.GOOS failed, unknown OS")
+		os.Exit(1)
+	}
+	myPath.UserDataPath = dirPath + myPath.delimiter
+	myPath.TempDataPath = filepath.Join(myPath.UserDataPath, "temp") + myPath.delimiter
 
 	fmt.Println("UserDataPath:" + myPath.UserDataPath)
 	fmt.Println("TempDataPath:" + myPath.TempDataPath)

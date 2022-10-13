@@ -1,55 +1,37 @@
 package main
 
 import (
-	"flag"
 	"fmt"
 	"uploadClient/model"
 )
 
 func main() {
-	var (
-		user       string // 上传用户名
-		filePath   string // 本地文件路径
-		uploadPath string // 指定远端文件目录
-		targetUrl  string // 服务端URL 测试：http://127.0.0.1:27149/fileServer http://10.191.22.9:8001/27149
-		isCover    bool   // 覆盖文件
-		isDownload bool   // 下载文件
-		fileName   string //文件名
-	)
-	//命令行参数
-	flag.StringVar(&user, "u", "public", "upload user.")
-	flag.StringVar(&filePath, "f", "", "local file path.")
-	flag.StringVar(&uploadPath, "r", "/*home*", "remote dir path. option: /*home*, /*public*.\ne.g. -r /*home*/newdir")
-	flag.StringVar(&targetUrl, "l", "http://127.0.0.1:27149/fileServer", "server url.")
-	flag.StringVar(&fileName, "n", "", "download filename.")
-	flag.BoolVar(&isCover, "o", false, "overwrite.")
-	flag.BoolVar(&isDownload, "d", false, "download file. use with -u -n -r, without -o -f.")
-	flag.Parse()
+	myArgs := model.InitArgs()
 	// download file
-	if isDownload {
-		if user != "" && fileName != "" && uploadPath != "" && !isCover {
+	if myArgs.IsDownload {
+		if myArgs.FileName != "" && !myArgs.IsCover {
 			downloadModel := model.DownloadModel{}
-			downloadModel.Init(user, fileName, uploadPath, targetUrl)
+			downloadModel.Init(myArgs.User, myArgs.FileName, myArgs.UploadPath, myArgs.TargetUrl)
 			err := downloadModel.Download()
 			if err != nil {
+				fmt.Println(err)
 				fmt.Println("dowload failed")
-				fmt.Println(err.Error())
 			}
 		} else {
-			fmt.Println("-d must with -u -n -r, without -o -f.")
+			fmt.Println("use -d with -n and without -o.")
 		}
 		return
 	}
 	// upload file
 	uploadModel := model.UploadModel{}
-	err := uploadModel.Init(user, filePath, uploadPath)
+	err := uploadModel.Init(myArgs.User, myArgs.FilePath, myArgs.UploadPath)
 	if err != nil {
 		fmt.Println(err)
 		return
 	}
 	// set url
-	uploadModel.SetUrl(targetUrl)
-	uploadModel.IsCover = isCover //是否覆盖上传
+	uploadModel.SetUrl(myArgs.TargetUrl)
+	uploadModel.IsCover = myArgs.IsCover //是否覆盖上传
 	//fileHash := arsHash.FileHash(filePath)
 	//fmt.Println(fileHash)
 

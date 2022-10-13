@@ -8,8 +8,7 @@ import (
 )
 
 func main() {
-	// init path
-	global.GetPath()
+	global.InitPath()
 	e := gin.Default()
 	e.POST("/fileServer/uploadAppend", controler.AppendHandle)
 	e.POST("/fileServer/uploadNewFile", controler.UploadNewFile)

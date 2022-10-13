@@ -6,6 +6,7 @@ import (
 	"net/http"
 	"os"
 	"path"
+	"path/filepath"
 	"strconv"
 	"strings"
 
@@ -16,11 +17,8 @@ import (
 )
 
 var (
-	myPath = global.GetPath()
+	myPath = global.InitPath()
 )
-
-//const myPath.UserDataPath = "/root/go/src/fileServer/uploadServer/"
-//const myPath.TempDataPath = "/root/go/src/fileServer/uploadServer/"
 
 type fileInfo struct {
 	FileName string `json:"fileName"`
@@ -59,19 +57,10 @@ func createFilePath(path string) error {
 }
 
 func uploadPathToLocalPath(user, uploadPath string) string {
-	if len(uploadPath) >= 9 { //   "/*public*"的长度是9
-		if strings.Compare(uploadPath[0:9], "/*public*") == 0 {
-			return fmt.Sprintf("%scommon%s/", myPath.UserDataPath, uploadPath[9:]) //realPath为空时 //  双斜杠等效于 /
-		}
-
+	if user == "public" {
+		return filepath.Join(myPath.UserDataPath, "Common", uploadPath) + "/"
 	}
-	if len(uploadPath) >= 7 { //   "/*home*"的长度是7
-		if strings.Compare(uploadPath[0:7], "/*home*") == 0 {
-			return fmt.Sprintf("%sUser/%s/home%s/", myPath.UserDataPath, user, uploadPath[7:]) //realPath为空时 //  双斜杠等效于 /
-		}
-
-	}
-	return fmt.Sprintf("%sUser/%s/home/", myPath.UserDataPath, user)
+	return filepath.Join(myPath.UserDataPath, "User", user, uploadPath) + "/"
 }
 
 // 名称重复时，获取最新的名称
