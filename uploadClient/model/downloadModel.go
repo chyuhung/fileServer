@@ -40,7 +40,11 @@ func (self *DownloadModel) Download() error {
 	}
 	defer res.Body.Close()
 	// 保存文件
-	dir, _ := os.Getwd()
+	dir, err := os.Getwd()
+	if err != nil {
+		fmt.Println("Getwd failed")
+		return err
+	}
 	fileDir := filepath.Join(dir, "download")
 	os.MkdirAll(fileDir, 0755)
 	filePath := filepath.Join(fileDir, self.uploadName)
